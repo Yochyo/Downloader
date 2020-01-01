@@ -2,7 +2,6 @@ package de.yochyo.downloader
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
@@ -25,12 +24,11 @@ abstract class RegulatingDownloader<E>(val maxThreads: Int = 1) : AbstractDownlo
         GlobalScope.launch(Dispatchers.IO) {
             while (downloads.isNotEmpty()) {
                 try {
-                    downloadFile(downloads.pop())
+                    downloadNextFile()
                 } catch (e: Exception) {
                 }
             }
             --activeCoroutines
-            cancel()
         }
     }
 

@@ -1,9 +1,8 @@
 package de.yochyo.downloader
 
+import de.yochyo.utils.DownloadUtils
 import kotlinx.coroutines.*
 import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.*
 
 internal typealias Download<E> = Pair<String, suspend (e: E) -> Unit>
@@ -17,52 +16,28 @@ abstract class AbstractDownloader<E> {
 
     abstract fun toResource(inputStream: InputStream): E
 
+    internal abstract fun startDownloader()
+
     open fun download(url: String, callback: suspend (e: E) -> Unit) {
         downloads += Download(url, callback)
     }
 
-    internal open fun startDownloader() {
-        GlobalScope.launch(Dispatchers.IO) {
-            while (true) {
-                try {
-                    downloadFile(downloads.pop())
-                } catch (e: Exception) {
-                    delay(50)
-                }
-            }
-        }
-    }
-
-    internal open suspend fun downloadFile(download: Download<E>) {
-        /*
+    internal suspend fun downloadNextFile() {
         withContext(Dispatchers.IO) {
+            val download = downloads.pop()
             try {
-                val stream = getUrlInputStream(download.first)
+                val stream = DownloadUtils.getUrlInputStream(download.first)
                 if (stream != null) {
                     val resource = toResource(stream)
                     stream.close()
                     download.second(resource)
                 }
-            } finally {
+            } catch (e: Exception) {
             }
         }
-         */
     }
 
     fun stop() = _stop()
     internal abstract fun _stop()
 
-    internal suspend fun getUrlInputStream(url: String): InputStream? {
-        return withContext(Dispatchers.IO) {
-            return@withContext try {
-                val conn = URL(url).openConnection() as HttpURLConnection
-                conn.addRequestProperty("User-Agent", "Mozilla/5.00")
-                conn.requestMethod = "GET"
-                conn.inputStream
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        }
-    }
 }

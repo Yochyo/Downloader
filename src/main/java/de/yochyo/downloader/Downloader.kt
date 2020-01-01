@@ -1,9 +1,8 @@
 package de.yochyo.downloader
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
+@Deprecated("Use RegulatingDownloader instead")
 abstract class Downloader<E>(coroutines: Int) : AbstractDownloader<E>() {
     private var enabled = true
 
@@ -15,10 +14,11 @@ abstract class Downloader<E>(coroutines: Int) : AbstractDownloader<E>() {
 
     override fun startDownloader() {
         GlobalScope.launch(Dispatchers.IO) {
-            while (enabled) {
+            while (isActive) {
                 try {
-                    downloadFile(downloads.pop())
+                    downloadNextFile()
                 } catch (e: Exception) {
+                    delay(50)
                 }
             }
         }
