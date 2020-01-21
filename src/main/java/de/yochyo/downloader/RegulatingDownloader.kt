@@ -3,6 +3,7 @@ package de.yochyo.downloader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.io.InputStream
 import kotlin.math.min
 
 
@@ -32,8 +33,8 @@ abstract class RegulatingDownloader<E>(val maxThreads: Int = 1) : AbstractDownlo
         }
     }
 
-    override fun download(url: String, callback: suspend (e: E) -> Unit) {
-        super.download(url, callback)
+    override fun download(url: String, callback: suspend (e: E) -> Unit, data: Any) {
+        super.download(url, callback, data)
         updateJobAmount()
     }
 

@@ -5,7 +5,7 @@ import kotlinx.coroutines.*
 import java.io.InputStream
 import java.util.*
 
-internal typealias Download<E> = Pair<String, suspend (e: E) -> Unit>
+internal typealias Download<E> = Triple<String, suspend (e: E) -> Unit, Any> //URL, callback, data (for toResource)
 
 abstract class AbstractDownloader<E> {
     private val lock = Any()
@@ -14,12 +14,12 @@ abstract class AbstractDownloader<E> {
         override fun push(item: Download<E>?) = synchronized(lock) { super.push(item) }
     }
 
-    abstract fun toResource(inputStream: InputStream): E
+    abstract fun toResource(inputStream: InputStream, data: Any): E
 
     internal abstract fun startDownloader()
 
-    open fun download(url: String, callback: suspend (e: E) -> Unit) {
-        downloads += Download(url, callback)
+    open fun download(url: String, callback: suspend (e: E) -> Unit, data: Any = "") {
+        downloads += Download(url, callback, data)
     }
 
     internal suspend fun downloadNextFile() {
@@ -28,7 +28,7 @@ abstract class AbstractDownloader<E> {
             try {
                 val stream = DownloadUtils.getUrlInputStream(download.first)
                 if (stream != null) {
-                    val resource = toResource(stream)
+                    val resource = toResource(stream, download.third)
                     stream.close()
                     download.second(resource)
                 }
