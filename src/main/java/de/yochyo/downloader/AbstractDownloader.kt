@@ -31,6 +31,7 @@ abstract class AbstractDownloader<E> {
                     download.second(resource)
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
