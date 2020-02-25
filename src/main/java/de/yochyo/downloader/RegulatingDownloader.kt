@@ -1,12 +1,9 @@
 package de.yochyo.downloader
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
 import kotlin.math.min
 
-
-abstract class RegulatingDownloader<E>(val maxThreads: Int = 1) : AbstractDownloader<E>() {
+abstract class RegulatingDownloader<E>(var maxCoroutines: Int) : ADownloader<E>(){
     private val lock = Any()
     internal var activeCoroutines = 0
         get() = synchronized(lock) { field }
@@ -14,30 +11,25 @@ abstract class RegulatingDownloader<E>(val maxThreads: Int = 1) : AbstractDownlo
             synchronized(lock) { field = value }
         }
 
-    internal open fun updateJobAmount() {
-        while (activeCoroutines < min(maxThreads, downloads.size))
-            startDownloader()
-    }
+    override fun keepCoroutineAliveWhile(scope: CoroutineScope): Boolean = downloads.isNotEmpty()
 
-    override fun startDownloader() {
+    override fun onStartCoroutine() {
         ++activeCoroutines
-        GlobalScope.launch(Dispatchers.IO) {
-            while (downloads.isNotEmpty()) {
-                try {
-                    downloadNextFile()
-                } catch (e: Exception) {
-                }
-            }
-            --activeCoroutines
-        }
     }
 
-    override fun download(url: String, callback: suspend (e: E) -> Unit, downloadFirst: Boolean, data: Any) {
-        super.download(url, callback, downloadFirst, data)
+    override fun onStopCoroutine() {
+        --activeCoroutines
+    }
+    override fun onAddDownload() {
         updateJobAmount()
     }
 
-    override fun _stop() {
+    protected open fun updateJobAmount() {
+        while (activeCoroutines < min(maxCoroutines, downloads.size))
+            startCoroutine()
+    }
+
+    override fun stop() {
         downloads.clear()
     }
 }
