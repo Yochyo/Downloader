@@ -5,7 +5,7 @@ import kotlin.math.min
 
 abstract class RegulatingDownloader<E>(var maxCoroutines: Int) : ADownloader<E>(){
     private val lock = Any()
-    internal var activeCoroutines = 0
+    var activeCoroutines = 0
         get() = synchronized(lock) { field }
         set(value) {
             synchronized(lock) { field = value }

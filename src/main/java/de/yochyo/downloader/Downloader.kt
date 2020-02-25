@@ -12,6 +12,9 @@ abstract class Downloader<E>(coroutines: Int) : ADownloader<E>() {
 
     override fun keepCoroutineAliveWhile(scope: CoroutineScope) = enabled
 
+    override fun onAddDownload() {
+        enabled = true
+    }
     override fun stop() {
         enabled = false
     }

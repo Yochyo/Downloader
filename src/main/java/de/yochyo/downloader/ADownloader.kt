@@ -44,26 +44,27 @@ abstract class ADownloader<E> : IDownloader<E> {
                 } catch (e: Exception) {
                 }
             }
+            joinAll()
             onStopCoroutine()
         }
     }
 
     internal suspend fun processNextFile(download: Download<E> = downloads.takeLast()): E? {
-        var result: E? = null
-        withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             try {
                 val stream = DownloadUtils.getUrlInputStream(download.first)
                 if (stream != null) {
-                    result = toResource(stream, download.third)
+                    val result = toResource(stream, download.third)
                     stream.close()
-                    launch { download.second(result!!) }
-                    launch { onDownloadedResource(result!!) }
-                }
+                    launch { download.second(result) }
+                    launch { onDownloadedResource(result) }
+                    result
+                } else null
             } catch (e: Exception) {
                 e.printStackTrace()
+                null
             }
         }
-        return result
     }
 
 }
