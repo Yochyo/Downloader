@@ -3,6 +3,9 @@ package de.yochyo.downloader
 import kotlinx.coroutines.CoroutineScope
 import kotlin.math.min
 
+/**
+ * A Downloader with a maximum of @property maxCoroutines parallel downloads
+ */
 abstract class RegulatingDownloader<E>(var maxCoroutines: Int) : ADownloader<E>(){
     private val lock = Any()
     var activeCoroutines = 0
