@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingDeque
 internal typealias Download<E> = Triple<String, suspend (e: E) -> Unit, Any> //URL, callback, data (for toResource)
 
 abstract class ADownloader<E> : IDownloader<E> {
+    val config = DownloaderConfig()
     protected val downloads = LinkedBlockingDeque<Download<E>>()
 
     abstract fun toResource(inputStream: InputStream, context: Any): E
@@ -18,7 +19,7 @@ abstract class ADownloader<E> : IDownloader<E> {
     protected open fun onStartCoroutine() {}
     protected open fun onStopCoroutine() {}
 
-    protected open suspend fun CoroutineScope.onDownloadedResource(e: E) {}
+    protected open suspend fun onDownloadedResource(e: E) {}
     protected open fun onAddDownload() {}
 
     override fun download(url: String, callback: suspend (e: E) -> Unit, context: Any) {
@@ -55,9 +56,10 @@ abstract class ADownloader<E> : IDownloader<E> {
                 val stream = DownloadUtils.getUrlInputStream(download.first)
                 if (stream != null) {
                     val result = toResource(stream, download.third)
-                    stream.close()
+                    if (config.closeStreamAfterDownload)
+                        stream.close()
+                    onDownloadedResource(result)
                     launch { download.second(result) }
-                    launch { onDownloadedResource(result) }
                     result
                 } else null
             } catch (e: Exception) {
