@@ -1,6 +1,5 @@
 package de.yochyo.downloader
 
-import de.yochyo.utils.DownloadUtils
 import kotlinx.coroutines.*
 import java.io.InputStream
 import java.util.concurrent.LinkedBlockingDeque

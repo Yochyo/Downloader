@@ -1,4 +1,4 @@
-package de.yochyo.utils
+package de.yochyo.downloader
 
 import de.yochyo.json.JSONArray
 import kotlinx.coroutines.Dispatchers
