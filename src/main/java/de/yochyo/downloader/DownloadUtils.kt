@@ -37,7 +37,7 @@ object DownloadUtils {
         var array: JSONArray? = null
         try {
             val
-                    array = JSONArray(String(getUrlInputStream(urlToRead)!!.readBytes()))
+                    array = JSONArray(String(getUrlInputStream(urlToRead)!!.use { it.readBytes() }))
         } catch (e: Exception) {
         }
         return array
