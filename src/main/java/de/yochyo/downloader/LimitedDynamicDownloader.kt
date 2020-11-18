@@ -1,6 +1,7 @@
 package de.yochyo.downloader
 
 import kotlin.math.min
+
 /**
  * A dynamic downloader with a maximum of amountOfDownloads/proportion or @property maxCoroutines parallel downloads
  */
