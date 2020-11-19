@@ -5,7 +5,7 @@ import java.io.InputStream
 import java.util.concurrent.LinkedBlockingDeque
 
 
-internal typealias Download<E> = Triple<String, DownloadCallback<E>, Any> //URL, callback, data (for toResource)
+internal typealias Download<E> = Triple<String, suspend (e: E?) -> Unit, Any> //URL, callback, data (for toResource)
 
 @Suppress("BlockingMethodInNonBlockingContext")
 abstract class ADownloader<E> : IDownloader<E> {
@@ -23,18 +23,18 @@ abstract class ADownloader<E> : IDownloader<E> {
     protected open suspend fun onDownloadedResource(e: E) {}
     protected open fun onAddDownload() {}
 
-    override fun download(url: String, callback: DownloadCallback<E>, context: Any) {
+    override fun download(url: String, callback: suspend (e: E?) -> Unit, context: Any) {
         downloads.putLast(Download(url, callback, context))
         onAddDownload()
     }
 
-    override fun downloadNow(url: String, callback: DownloadCallback<E>, context: Any) {
+    override fun downloadNow(url: String, callback: suspend (e: E?) -> Unit, context: Any) {
         downloads.putFirst(Download(url, callback, context))
         onAddDownload()
     }
 
     override suspend fun downloadSync(url: String, context: Any): E? {
-        return processNextFile(Download(url, { _, _, _ -> }, context))
+        return processNextFile(Download(url, {}, context))
     }
 
     internal fun startCoroutine() {
@@ -60,10 +60,10 @@ abstract class ADownloader<E> : IDownloader<E> {
                 if (config.closeStreamAfterDownload)
                     stream.close()
                 onDownloadedResource(result)
-                launch { download.second(result, download.first, download.third) }
+                launch { download.second(result) }
                 result
             } catch (e: Exception) {
-                launch { download.second(null, download.first, download.third) }
+                launch { download.second(null) }
                 e.printStackTrace()
                 null
             }

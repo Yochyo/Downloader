@@ -6,7 +6,7 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-internal object DownloadUtils {
+object DownloadUtils {
     suspend fun getUrlInputStream(url: String): InputStream? {
         return withContext(Dispatchers.IO) {
             return@withContext try {
