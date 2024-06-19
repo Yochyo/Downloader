@@ -6,10 +6,10 @@
 
     <groupId>de.yochyo.downloader</groupId>
     <artifactId>Downloader</artifactId>
-    <version>1.8.0</version>
+    <version>1.8.1</version>
 
     <properties>
-        <kotlin.version>1.4.10</kotlin.version>
+        <kotlin.version>1.9.20</kotlin.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
